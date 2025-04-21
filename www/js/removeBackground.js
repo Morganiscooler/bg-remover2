@@ -74,6 +74,27 @@ function removeBackground() {
   link.appendChild(span);
 
   resultDiv.appendChild(link);
+
+  async function getUniqueFilename(dirEntry, baseName, extension) {
+    return new Promise((resolve) => {
+        let counter = 1;
+        let newName = baseName + extension;
+
+        function checkFile() {
+            dirEntry.getFile(newName, { create: false }, () => {
+                // File exists, try next number
+                newName = `${baseName}_${counter}${extension}`;
+                counter++;
+                checkFile(); // Recursively check again
+            }, () => {
+                // File does not exist, use this name
+                resolve(newName);
+            });
+        }
+
+        checkFile(); // Start checking
+    });
+}
   
   async function blobUrlToBase64(blobUrl) {
     const response = await fetch(blobUrl);
@@ -85,43 +106,58 @@ function removeBackground() {
         reader.readAsDataURL(blob);
     });
 }
-async function downloadBase64Image(base64Data, filename = 'image.png') {
+async function downloadBase64Image(base64Data, filename = 'downloaded_image') {
   try {
+      // Ensure filename has no extension (we'll add it later)
+      const baseName = filename.replace(/\.[^/.]+$/, ""); // Remove existing extension
+      const extension = '.png';
+
       // Get the Downloads directory path (Android)
       const downloadsDir = cordova.file.externalRootDirectory + 'Download/';
 
-      // Use the File plugin to write the file
-      window.resolveLocalFileSystemURL(downloadsDir, (dirEntry) => {
-          dirEntry.getFile(filename, { create: true }, (fileEntry) => {
-              fileEntry.createWriter((fileWriter) => {
-                  fileWriter.onwriteend = () => {
-                      console.log('Image downloaded successfully!');
-                      // Optionally open the file after download
-                      cordova.plugins.fileOpener2.open(
-                          fileEntry.toURL(),
-                          'image/png',
-                          { error: (e) => console.error('Error opening file:', e) }
-                      );
-                  };
-                  fileWriter.onerror = (e) => console.error('Error writing file:', e);
+      // Resolve the directory
+      const dirEntry = await new Promise((resolve, reject) => {
+          window.resolveLocalFileSystemURL(downloadsDir, resolve, reject);
+      });
 
-                  // Convert base64 to a Blob
-                  const byteCharacters = atob(base64Data);
-                  const byteNumbers = new Array(byteCharacters.length);
-                  for (let i = 0; i < byteCharacters.length; i++) {
-                      byteNumbers[i] = byteCharacters.charCodeAt(i);
-                  }
-                  const byteArray = new Uint8Array(byteNumbers);
-                  const blob = new Blob([byteArray], { type: 'image/png' });
+      // Get a unique filename (e.g., "downloaded_image_1.png")
+      const uniqueFilename = await getUniqueFilename(dirEntry, baseName, extension);
 
-                  fileWriter.write(blob);
-              });
-          }, (error) => console.error('Error creating file:', error));
-      }, (error) => console.error('Error accessing downloads directory:', error));
+      // Write the file
+      const fileEntry = await new Promise((resolve, reject) => {
+          dirEntry.getFile(uniqueFilename, { create: true }, resolve, reject);
+      });
+
+      const fileWriter = await new Promise((resolve, reject) => {
+          fileEntry.createWriter(resolve, reject);
+      });
+
+      fileWriter.onwriteend = () => {
+          console.log(`Image saved as: ${uniqueFilename}`);
+          // Optionally open the file
+          cordova.plugins.fileOpener2.open(
+              fileEntry.toURL(),
+              'image/png',
+              { error: (e) => console.error('Error opening file:', e) }
+          );
+      };
+
+      fileWriter.onerror = (e) => console.error('Error writing file:', e);
+
+      // Convert base64 to a Blob and write
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/png' });
+
+      fileWriter.write(blob);
   } catch (e) {
       console.error('Error:', e);
   }
-}  
+}
 
 link.addEventListener("click", async () => {
   const blobUrl = url; // e.g., from camera or fetched data
