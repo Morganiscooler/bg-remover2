@@ -5,6 +5,8 @@
     <author email="morgancuiuwu@gmail.com" href="https://morgancuiuwu@gmail.com">
         Apache Cordova Team
     </author>
+    <icon src="www/img/icon.png" />
+    <preference name="AndroidWindowSplashScreenAnimatedIcon" value="www/img/resized_icon.png" />
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />

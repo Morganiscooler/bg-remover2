@@ -23,6 +23,13 @@ document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady() {
     // Cordova is now initialized. Have fun!
+        // Lock screen to portrait mode
+        screen.orientation.lock("portrait");
+
+        // Optional: Add an event listener to monitor orientation changes
+        window.addEventListener('orientationchange', function() {
+            console.log('Orientation changed:', screen.orientation.type);
+        });
 
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
     document.getElementById('deviceready').classList.add('ready');
