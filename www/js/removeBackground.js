@@ -21,7 +21,7 @@ function removeBackground() {
 
     headers: {
 
-      "X-Api-Key": "VBxdDWWyuJa2epfDtxf8F56R"
+      "X-Api-Key": "eLcgDCLQUjrkVE42T5RZq4TV"
 
       // "X-Api-Key": "8UvDuz97hr15MGsPGKfkadNS"
 

@@ -20,25 +20,44 @@ const previewContainer = document.getElementById("imagePreview");
 const previewImage = previewContainer.querySelector(".image-preview__image");
 const previewDefaultText = previewContainer.querySelector(".image-preview__default-text");
 
-fileInput.addEventListener("change", function(){
-  const file = this.files[0];
+// fileInput.addEventListener("change", function(){
+//   const file = document.querySelector('input[type=file]').files[0];
 
-  if (file){
-      const reader = new FileReader();
+//   if (file){
+//       const reader = new FileReader();
 
-      previewDefaultText.style.display = "none";
-      previewImage.style.display = "block";
+//       previewDefaultText.style.display = "none";
+//       previewImage.style.display = "block";
 
-      reader.addEventListener("load", function(){
-        previewImage.setAttribute("src", this.result);
-      });
+//       reader.addEventListener("load", function(){
+//         previewImage.setAttribute("src", reader.result);
+//       });
 
-      reader.readAsDataURL(file);
+//       reader.readAsDataURL(file);
 
-    }
-    else{
-      previewDefaultText.style.display = null;
-      previewImage.style.display = null;
-      previewImage.setAttribute("src", "");
-    }
-})
+//     }
+//     else{
+//       previewDefaultText.style.display = null;
+//       previewImage.style.display = null;
+//       previewImage.setAttribute("src", "");
+//     }
+// })
+
+function previewFile() {
+  var file    = document.querySelector('input[type=file]').files[0];
+  var reader  = new FileReader();
+
+  reader.onloadend = function () {
+    previewImage.src = reader.result;
+    previewImage.style.display = "block";
+    previewDefaultText.style.display = "none";
+  }
+
+  if (file) {
+    reader.readAsDataURL(file);
+  } else {
+    previewImage.src = "";
+    previewImage.style.display = "none";
+    previewDefaultText.style.display = "block";
+  }
+}

@@ -23,7 +23,7 @@
         <center>
             <h1>Select an Image</h1>
             <!-- Add a label that tells if files have been selected, or if none has been selected -->
-            <input class="app" type="file" id="fileSelector">
+            <input class="app" type="file" id="fileSelector" onchange="previewFile()" >
             </input>
             <div class="image-preview" id="imagePreview">
                 <img src="" alt="Image Preview" class="image-preview__image">
